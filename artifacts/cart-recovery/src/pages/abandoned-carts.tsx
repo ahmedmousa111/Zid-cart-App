@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,15 +26,128 @@ import {
   LogOut,
   Bell,
   Search,
-  RefreshCw,
   Mail,
   Phone,
-  AlertCircle,
   TrendingUp,
   Clock,
   CheckCircle2,
 } from "lucide-react";
-import { supabase, type AbandonedCart } from "@/lib/supabase";
+import type { AbandonedCart } from "@/lib/supabase";
+
+const DUMMY_CARTS: AbandonedCart[] = [
+  {
+    id: "1",
+    store_id: "store-1",
+    customer_name: "سارة عبدالله",
+    customer_email: "sara@example.com",
+    customer_phone: "+966500000001",
+    cart_total: 780,
+    currency: "SAR",
+    items_count: 3,
+    status: "pending",
+    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    recovered_at: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    store_id: "store-1",
+    customer_name: "محمد الحربي",
+    customer_email: "mohammed@example.com",
+    customer_phone: "+966500000002",
+    cart_total: 1450,
+    currency: "SAR",
+    items_count: 5,
+    status: "contacted",
+    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+    recovered_at: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    store_id: "store-1",
+    customer_name: "نورة الشهري",
+    customer_email: "noura@example.com",
+    customer_phone: "+966500000003",
+    cart_total: 320,
+    currency: "SAR",
+    items_count: 1,
+    status: "recovered",
+    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
+    recovered_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "4",
+    store_id: "store-1",
+    customer_name: "خالد العتيبي",
+    customer_email: "khalid@example.com",
+    customer_phone: "+966500000004",
+    cart_total: 2100,
+    currency: "SAR",
+    items_count: 4,
+    status: "pending",
+    abandoned_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+    recovered_at: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "5",
+    store_id: "store-1",
+    customer_name: "ريم القحطاني",
+    customer_email: "reem@example.com",
+    customer_phone: "+966500000005",
+    cart_total: 540,
+    currency: "SAR",
+    items_count: 2,
+    status: "lost",
+    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
+    recovered_at: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "6",
+    store_id: "store-1",
+    customer_name: "عبدالرحمن الزهراني",
+    customer_email: "abdulrahman@example.com",
+    customer_phone: "+966500000006",
+    cart_total: 980,
+    currency: "SAR",
+    items_count: 6,
+    status: "contacted",
+    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
+    recovered_at: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "7",
+    store_id: "store-1",
+    customer_name: "هند الدوسري",
+    customer_email: "hind@example.com",
+    customer_phone: "+966500000007",
+    cart_total: 1875,
+    currency: "SAR",
+    items_count: 7,
+    status: "recovered",
+    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+    recovered_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "8",
+    store_id: "store-1",
+    customer_name: "فهد السبيعي",
+    customer_email: "fahad@example.com",
+    customer_phone: "+966500000008",
+    cart_total: 410,
+    currency: "SAR",
+    items_count: 2,
+    status: "pending",
+    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
+    recovered_at: null,
+    created_at: new Date().toISOString(),
+  },
+];
 
 const STATUS_LABELS: Record<AbandonedCart["status"], string> = {
   pending: "قيد الانتظار",
@@ -77,31 +190,8 @@ function formatDate(iso: string) {
 }
 
 export default function AbandonedCarts() {
-  const [carts, setCarts] = useState<AbandonedCart[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [carts] = useState<AbandonedCart[]>(DUMMY_CARTS);
   const [search, setSearch] = useState("");
-
-  async function loadCarts() {
-    setLoading(true);
-    setError(null);
-    const { data, error } = await supabase
-      .from("abandoned_carts")
-      .select("*")
-      .order("abandoned_at", { ascending: false });
-
-    if (error) {
-      setError(error.message);
-      setCarts([]);
-    } else {
-      setCarts(data ?? []);
-    }
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    loadCarts();
-  }, []);
 
   const filtered = carts.filter((c) => {
     if (!search.trim()) return true;
@@ -208,15 +298,6 @@ export default function AbandonedCarts() {
                 تابع كل سلة لم يُكمل صاحبها الشراء، وأعد جذب العملاء بحملات ذكية.
               </p>
             </div>
-            <Button
-              variant="outline"
-              onClick={loadCarts}
-              disabled={loading}
-              className="gap-2"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-              تحديث البيانات
-            </Button>
           </div>
 
           {/* Stats */}
@@ -292,22 +373,7 @@ export default function AbandonedCarts() {
               </div>
             </CardHeader>
             <CardContent>
-              {error ? (
-                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-6 text-center">
-                  <AlertCircle className="w-8 h-8 mx-auto text-destructive mb-2" />
-                  <p className="font-medium text-destructive">
-                    تعذّر تحميل البيانات
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">{error}</p>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    تأكد من إنشاء جدول <code>abandoned_carts</code> في Supabase.
-                  </p>
-                </div>
-              ) : loading ? (
-                <div className="py-16 text-center text-muted-foreground">
-                  جارٍ التحميل...
-                </div>
-              ) : filtered.length === 0 ? (
+              {filtered.length === 0 ? (
                 <div className="py-16 text-center">
                   <ShoppingCart className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
                   <p className="font-medium">لا توجد سلات مهجورة بعد</p>
