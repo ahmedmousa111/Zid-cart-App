@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { supabaseAdmin } from "../lib/supabase";
 import { getMerchantId } from "../lib/session";
+import { getValidZidToken } from "../lib/zid";
 
 const router: IRouter = Router();
 
@@ -119,17 +119,7 @@ router.get("/carts", async (req: Request, res: Response) => {
     return;
   }
 
-  const { data: tokenRow, error: tokenError } = await supabaseAdmin
-    .from("zid_tokens")
-    .select("access_token, authorization_token")
-    .eq("merchant_id", merchantId)
-    .maybeSingle();
-
-  if (tokenError) {
-    req.log.error({ tokenError }, "Failed to load Zid token");
-    res.status(500).json({ error: "token_lookup_failed" });
-    return;
-  }
+  const tokenRow = await getValidZidToken(merchantId);
 
   if (!tokenRow?.access_token) {
     res.status(401).json({ error: "no_token" });
