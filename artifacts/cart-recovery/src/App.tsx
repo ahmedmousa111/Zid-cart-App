@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import AbandonedCarts from "@/pages/abandoned-carts";
+import DebugOauth from "@/pages/debug-oauth";
 
 const queryClient = new QueryClient();
 
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/abandoned-carts" component={AbandonedCarts} />
+      <Route path="/debug/oauth" component={DebugOauth} />
       <Route component={NotFound} />
     </Switch>
   );

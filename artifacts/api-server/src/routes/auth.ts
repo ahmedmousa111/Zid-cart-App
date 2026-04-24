@@ -162,6 +162,33 @@ router.post("/auth/logout", (_req: Request, res: Response) => {
   res.json({ ok: true });
 });
 
+router.get("/debug/oauth", (req: Request, res: Response) => {
+  const redirectUri = getRedirectUri(req);
+  const params = new URLSearchParams({
+    client_id: ZID_CLIENT_ID ?? "MISSING",
+    redirect_uri: redirectUri,
+    response_type: "code",
+    state: "DIAGNOSTIC_STATE_PLACEHOLDER",
+  });
+  const authorizeUrl = `${ZID_AUTHORIZE_URL}?${params.toString()}`;
+
+  res.json({
+    authorize_endpoint: ZID_AUTHORIZE_URL,
+    token_endpoint: ZID_TOKEN_URL,
+    client_id: ZID_CLIENT_ID ?? null,
+    client_id_length: ZID_CLIENT_ID?.length ?? 0,
+    client_secret_configured: Boolean(ZID_CLIENT_SECRET),
+    client_secret_length: ZID_CLIENT_SECRET?.length ?? 0,
+    redirect_uri: redirectUri,
+    full_authorize_url: authorizeUrl,
+    notes: [
+      "client_id should match the 'Client ID' in your Zid Partner Dashboard (often a long alphanumeric string, NOT the short numeric App ID).",
+      "redirect_uri must be registered VERBATIM in your Zid app's allowed redirect URIs.",
+      "If Zid redirects to the merchant dashboard instead of the consent screen, the most common cause is a wrong client_id or an unpublished/uninstalled app.",
+    ],
+  });
+});
+
 router.get("/auth/me", async (req: Request, res: Response) => {
   const merchantId = getMerchantId(req);
   if (!merchantId) {
