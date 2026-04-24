@@ -33,11 +33,11 @@ export default function Dashboard() {
               <LayoutDashboard className="w-5 h-5" />
               لوحة التحكم
             </Link>
-            <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors font-medium">
+            <Link href="/dashboard/abandoned-carts" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors font-medium">
               <ShoppingCart className="w-5 h-5" />
               السلات المهجورة
               <span className="mr-auto bg-primary text-primary-foreground text-[10px] px-2 py-0.5 rounded-full">جديد</span>
-            </a>
+            </Link>
             <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors font-medium">
               <Megaphone className="w-5 h-5" />
               الحملات
