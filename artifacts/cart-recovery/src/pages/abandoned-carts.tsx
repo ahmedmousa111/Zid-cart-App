@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link } from "wouter";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -31,123 +32,11 @@ import {
   TrendingUp,
   Clock,
   CheckCircle2,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import type { AbandonedCart } from "@/lib/supabase";
-
-const DUMMY_CARTS: AbandonedCart[] = [
-  {
-    id: "1",
-    store_id: "store-1",
-    customer_name: "سارة عبدالله",
-    customer_email: "sara@example.com",
-    customer_phone: "+966500000001",
-    cart_total: 780,
-    currency: "SAR",
-    items_count: 3,
-    status: "pending",
-    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    recovered_at: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    store_id: "store-1",
-    customer_name: "محمد الحربي",
-    customer_email: "mohammed@example.com",
-    customer_phone: "+966500000002",
-    cart_total: 1450,
-    currency: "SAR",
-    items_count: 5,
-    status: "contacted",
-    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    recovered_at: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    store_id: "store-1",
-    customer_name: "نورة الشهري",
-    customer_email: "noura@example.com",
-    customer_phone: "+966500000003",
-    cart_total: 320,
-    currency: "SAR",
-    items_count: 1,
-    status: "recovered",
-    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
-    recovered_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "4",
-    store_id: "store-1",
-    customer_name: "خالد العتيبي",
-    customer_email: "khalid@example.com",
-    customer_phone: "+966500000004",
-    cart_total: 2100,
-    currency: "SAR",
-    items_count: 4,
-    status: "pending",
-    abandoned_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    recovered_at: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "5",
-    store_id: "store-1",
-    customer_name: "ريم القحطاني",
-    customer_email: "reem@example.com",
-    customer_phone: "+966500000005",
-    cart_total: 540,
-    currency: "SAR",
-    items_count: 2,
-    status: "lost",
-    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
-    recovered_at: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "6",
-    store_id: "store-1",
-    customer_name: "عبدالرحمن الزهراني",
-    customer_email: "abdulrahman@example.com",
-    customer_phone: "+966500000006",
-    cart_total: 980,
-    currency: "SAR",
-    items_count: 6,
-    status: "contacted",
-    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-    recovered_at: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "7",
-    store_id: "store-1",
-    customer_name: "هند الدوسري",
-    customer_email: "hind@example.com",
-    customer_phone: "+966500000007",
-    cart_total: 1875,
-    currency: "SAR",
-    items_count: 7,
-    status: "recovered",
-    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
-    recovered_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "8",
-    store_id: "store-1",
-    customer_name: "فهد السبيعي",
-    customer_email: "fahad@example.com",
-    customer_phone: "+966500000008",
-    cart_total: 410,
-    currency: "SAR",
-    items_count: 2,
-    status: "pending",
-    abandoned_at: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-    recovered_at: null,
-    created_at: new Date().toISOString(),
-  },
-];
+import { apiFetch, ApiError } from "@/lib/api";
 
 const STATUS_LABELS: Record<AbandonedCart["status"], string> = {
   pending: "قيد الانتظار",
@@ -189,9 +78,28 @@ function formatDate(iso: string) {
   }
 }
 
+type ApiCart = Omit<AbandonedCart, "store_id" | "created_at">;
+
 export default function AbandonedCarts() {
-  const [carts] = useState<AbandonedCart[]>(DUMMY_CARTS);
+  const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
+
+  const { data, isLoading, error, refetch, isFetching } = useQuery<
+    { carts: ApiCart[] },
+    ApiError
+  >({
+    queryKey: ["carts"],
+    queryFn: () => apiFetch<{ carts: ApiCart[] }>("/carts"),
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (error?.status === 401) {
+      setLocation("/login");
+    }
+  }, [error, setLocation]);
+
+  const carts = data?.carts ?? [];
 
   const filtered = carts.filter((c) => {
     if (!search.trim()) return true;
@@ -262,15 +170,20 @@ export default function AbandonedCarts() {
         </div>
 
         <div className="p-4 border-t mt-auto">
-          <Link href="/">
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            >
-              <LogOut className="w-5 h-5 ml-2" />
-              تسجيل الخروج
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            onClick={async () => {
+              await fetch("/api/auth/logout", {
+                method: "POST",
+                credentials: "include",
+              });
+              setLocation("/login");
+            }}
+          >
+            <LogOut className="w-5 h-5 ml-2" />
+            تسجيل الخروج
+          </Button>
         </div>
       </aside>
 
@@ -298,6 +211,16 @@ export default function AbandonedCarts() {
                 تابع كل سلة لم يُكمل صاحبها الشراء، وأعد جذب العملاء بحملات ذكية.
               </p>
             </div>
+            <Button
+              variant="outline"
+              onClick={() => refetch()}
+              disabled={isFetching}
+            >
+              {isFetching ? (
+                <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+              ) : null}
+              تحديث
+            </Button>
           </div>
 
           {/* Stats */}
@@ -373,7 +296,29 @@ export default function AbandonedCarts() {
               </div>
             </CardHeader>
             <CardContent>
-              {filtered.length === 0 ? (
+              {isLoading ? (
+                <div className="py-16 text-center">
+                  <Loader2 className="w-8 h-8 mx-auto text-muted-foreground/60 animate-spin mb-4" />
+                  <p className="text-sm text-muted-foreground">
+                    جاري جلب السلات من متجرك على Zid...
+                  </p>
+                </div>
+              ) : error && error.status !== 401 ? (
+                <div className="py-12 text-center">
+                  <AlertCircle className="w-10 h-10 mx-auto text-destructive/70 mb-3" />
+                  <p className="font-medium">تعذّر جلب السلات من Zid</p>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
+                    تأكد من ربط متجرك بنجاح، ثم حاول مرة أخرى.
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="mt-4"
+                    onClick={() => refetch()}
+                  >
+                    إعادة المحاولة
+                  </Button>
+                </div>
+              ) : filtered.length === 0 ? (
                 <div className="py-16 text-center">
                   <ShoppingCart className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
                   <p className="font-medium">لا توجد سلات مهجورة بعد</p>

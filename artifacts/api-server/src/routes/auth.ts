@@ -2,6 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import crypto from "node:crypto";
 import { supabaseAdmin } from "../lib/supabase";
 import { logger } from "../lib/logger";
+import { signSession, getMerchantId } from "../lib/session";
 
 const router: IRouter = Router();
 
@@ -10,7 +11,6 @@ const ZID_TOKEN_URL = "https://oauth.zid.sa/oauth/token";
 
 const ZID_CLIENT_ID = process.env["ZID_CLIENT_ID"];
 const ZID_CLIENT_SECRET = process.env["ZID_CLIENT_SECRET"];
-const SESSION_SECRET = process.env["SESSION_SECRET"] ?? "dev-session-secret";
 
 function getBaseUrl(req: Request): string {
   const forwardedProto = req.get("x-forwarded-proto");
@@ -22,15 +22,6 @@ function getBaseUrl(req: Request): string {
 
 function getRedirectUri(req: Request): string {
   return `${getBaseUrl(req)}/api/auth/zid/callback`;
-}
-
-function signSession(merchantId: string): string {
-  const payload = Buffer.from(merchantId).toString("base64url");
-  const sig = crypto
-    .createHmac("sha256", SESSION_SECRET)
-    .update(payload)
-    .digest("base64url");
-  return `${payload}.${sig}`;
 }
 
 router.get("/auth/zid/start", (req: Request, res: Response) => {
@@ -169,6 +160,40 @@ router.get("/auth/zid/callback", async (req: Request, res: Response) => {
 router.post("/auth/logout", (_req: Request, res: Response) => {
   res.clearCookie("session", { path: "/" });
   res.json({ ok: true });
+});
+
+router.get("/auth/me", async (req: Request, res: Response) => {
+  const merchantId = getMerchantId(req);
+  if (!merchantId) {
+    res.status(401).json({ authenticated: false });
+    return;
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("zid_tokens")
+    .select("merchant_id, merchant_name, merchant_email, expires_at")
+    .eq("merchant_id", merchantId)
+    .maybeSingle();
+
+  if (error) {
+    req.log.error({ error }, "Failed to load merchant from Supabase");
+    res.status(500).json({ authenticated: false });
+    return;
+  }
+
+  if (!data) {
+    res.status(401).json({ authenticated: false });
+    return;
+  }
+
+  res.json({
+    authenticated: true,
+    merchant: {
+      id: data.merchant_id,
+      name: data.merchant_name,
+      email: data.merchant_email,
+    },
+  });
 });
 
 export default router;
