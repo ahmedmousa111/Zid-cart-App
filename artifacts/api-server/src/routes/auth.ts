@@ -21,7 +21,7 @@ function getBaseUrl(req: Request): string {
 }
 
 function getRedirectUri(req: Request): string {
-  return `${getBaseUrl(req)}/api/auth/zid/callback`;
+  return `${getBaseUrl(req)}/api/auth/callback`;
 }
 
 router.get("/auth/zid/start", (req: Request, res: Response) => {
@@ -49,7 +49,7 @@ router.get("/auth/zid/start", (req: Request, res: Response) => {
   res.redirect(`${ZID_AUTHORIZE_URL}?${params.toString()}`);
 });
 
-router.get("/auth/zid/callback", async (req: Request, res: Response) => {
+async function handleZidCallback(req: Request, res: Response): Promise<void> {
   const { code, state, error: zidError } = req.query;
   const cookieState = req.cookies?.["zid_oauth_state"];
 
@@ -155,7 +155,15 @@ router.get("/auth/zid/callback", async (req: Request, res: Response) => {
     logger.error({ err }, "Zid OAuth callback failed");
     res.redirect("/login?error=server_error");
   }
-});
+}
+
+// Primary callback path — must match what you register in the Zid Partner
+// Dashboard as the redirect URI: <base>/api/auth/callback
+router.get("/auth/callback", handleZidCallback);
+
+// Backwards-compat alias for older Zid app registrations that still point at
+// /api/auth/zid/callback. Safe to remove once Zid only ever calls /api/auth/callback.
+router.get("/auth/zid/callback", handleZidCallback);
 
 router.post("/auth/logout", (_req: Request, res: Response) => {
   res.clearCookie("session", { path: "/" });
