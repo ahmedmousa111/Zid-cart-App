@@ -1,7 +1,8 @@
 import { Link } from "wouter";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, ArrowRight, AlertCircle } from "lucide-react";
+import { Logo } from "@/components/brand/logo";
+import { ArrowRight, AlertCircle } from "lucide-react";
 
 const ERROR_MESSAGES: Record<string, string> = {
   zid_denied: "تم رفض الإذن من قِبَل Zid. يرجى المحاولة مرة أخرى.",
@@ -38,15 +39,15 @@ export default function Login() {
           العودة للرئيسية
         </Link>
 
-        <div className="bg-card border rounded-2xl shadow-xl overflow-hidden">
-          <div className="p-8 text-center border-b bg-muted/10">
-            <div className="inline-flex w-12 h-12 rounded-xl bg-primary items-center justify-center text-primary-foreground mb-4 shadow-inner">
-              <ShoppingCart className="w-6 h-6" />
+        <div className="bg-card border border-card-border rounded-xl shadow-2xl overflow-hidden">
+          <div className="p-10 text-center border-b border-card-border">
+            <div className="flex justify-center mb-5">
+              <Logo className="h-14 w-14" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              مرحباً بعودتك
+            <h1 className="text-2xl font-extrabold tracking-tight">
+              مرحباً بعودتك إلى عائد
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground mt-2 text-sm">
               سجل دخولك بحساب متجرك على Zid لمتابعة سلاتك المهجورة
             </p>
           </div>
@@ -68,7 +69,7 @@ export default function Login() {
             </Button>
 
             <p className="text-center text-xs text-muted-foreground leading-relaxed">
-              بالنقر على الزر، ستتم إعادة توجيهك إلى Zid لمنح منصة استرجاع
+              بالنقر على الزر، ستتم إعادة توجيهك إلى Zid لمنح منصة عائد
               صلاحية الوصول إلى متجرك.
             </p>
 

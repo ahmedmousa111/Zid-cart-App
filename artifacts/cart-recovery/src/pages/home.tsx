@@ -1,17 +1,13 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ShoppingCart, BarChart3, Zap, ShieldCheck } from "lucide-react";
+import { Logo, Wordmark } from "@/components/brand/logo";
+import { ArrowLeft, BarChart3, Zap, ShieldCheck } from "lucide-react";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="px-6 py-4 flex items-center justify-between border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground">
-            <ShoppingCart className="w-4 h-4" />
-          </div>
-          <span className="font-bold text-xl tracking-tight text-primary">استرجاع</span>
-        </div>
+      <header className="px-6 py-4 flex items-center justify-between border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
+        <Wordmark />
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
           <a href="#features" className="hover:text-primary transition-colors">المميزات</a>
           <a href="#how-it-works" className="hover:text-primary transition-colors">كيف نعمل</a>
@@ -98,7 +94,7 @@ export default function Home() {
         <section id="features" className="py-24 bg-muted/30">
           <div className="max-w-6xl mx-auto px-6 md:px-12">
             <div className="text-center mb-16 space-y-4">
-              <h2 className="text-3xl md:text-4xl font-bold">لماذا منصة استرجاع؟</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">لماذا منصة عائد؟</h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
                 صممنا أدواتنا خصيصاً لتلائم السوق العربي وتزيد من نسبة تحويل عملائك بأقل مجهود.
               </p>
@@ -118,7 +114,7 @@ export default function Home() {
                 {
                   icon: <ShieldCheck className="w-6 h-6 text-primary" />,
                   title: "ربط سلس وسريع",
-                  desc: "اربط متجرك (سلة، زد، وغيرها) بضغطة زر واحدة وابدأ في استرجاع المبيعات فوراً."
+                  desc: "اربط متجرك على Zid بضغطة زر واحدة وابدأ في استرجاع المبيعات فوراً."
                 }
               ].map((feature, i) => (
                 <div key={i} className="bg-card p-8 rounded-2xl border shadow-sm hover:shadow-md transition-shadow">
@@ -145,7 +141,7 @@ export default function Home() {
               <div className="relative z-10 space-y-8">
                 <h2 className="text-3xl md:text-5xl font-bold">مستعد لزيادة أرباحك اليوم؟</h2>
                 <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto">
-                  انضم إلى مئات المتاجر التي تثق بمنصة استرجاع لمضاعفة مبيعاتها بشكل يومي.
+                  انضم إلى مئات المتاجر التي تثق بمنصة عائد لمضاعفة مبيعاتها بشكل يومي.
                 </p>
                 <Link href="/login">
                   <Button size="lg" variant="secondary" className="text-lg px-10 h-14 mt-4">
@@ -162,10 +158,8 @@ export default function Home() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <div className="flex items-center justify-center md:justify-start gap-2">
-              <div className="w-6 h-6 rounded bg-primary flex items-center justify-center text-primary-foreground">
-                <ShoppingCart className="w-3 h-3" />
-              </div>
-              <span className="font-bold text-lg text-primary">استرجاع</span>
+              <Logo className="h-7 w-7" />
+              <span className="font-extrabold text-lg">عائد</span>
             </div>
             <p className="text-sm text-muted-foreground">
               المنصة الأذكى لزيادة مبيعات المتاجر الإلكترونية في العالم العربي.
@@ -197,7 +191,7 @@ export default function Home() {
           </div>
         </div>
         <div className="max-w-6xl mx-auto mt-12 pt-8 border-t text-sm text-muted-foreground text-center">
-          &copy; {new Date().getFullYear()} منصة استرجاع. جميع الحقوق محفوظة.
+          &copy; {new Date().getFullYear()} منصة عائد. جميع الحقوق محفوظة.
         </div>
       </footer>
     </div>

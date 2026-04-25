@@ -1,28 +1,24 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { 
-  LayoutDashboard, 
-  ShoppingCart, 
-  Megaphone, 
-  Settings, 
+import { Wordmark } from "@/components/brand/logo";
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Megaphone,
+  Settings,
   LogOut,
   Bell,
   Search,
-  Plus
+  Plus,
 } from "lucide-react";
 
 export default function Dashboard() {
   return (
     <div className="min-h-screen bg-muted/20 flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-card border-l flex flex-col shrink-0 sticky top-0 md:h-screen">
-        <div className="h-16 border-b flex items-center px-6">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
-              <ShoppingCart className="w-4 h-4" />
-            </div>
-            <span className="font-bold text-xl text-primary">استرجاع</span>
-          </div>
+      <aside className="w-full md:w-64 bg-sidebar border-l border-sidebar-border flex flex-col shrink-0 sticky top-0 md:h-screen">
+        <div className="h-20 border-b border-sidebar-border flex items-center px-6">
+          <Wordmark />
         </div>
         
         <div className="p-4 flex-1 overflow-y-auto space-y-1">
@@ -89,7 +85,7 @@ export default function Dashboard() {
         {/* Content Area - Empty State */}
         <div className="flex-1 p-6 md:p-10 flex flex-col">
           <div className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold">مرحباً بك في منصة استرجاع 👋</h1>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">مرحباً بك في منصة عائد</h1>
             <p className="text-muted-foreground mt-2">خطوة واحدة تفصلك عن استعادة مبيعاتك المفقودة.</p>
           </div>
 
@@ -104,7 +100,7 @@ export default function Dashboard() {
               <div className="space-y-2">
                 <h3 className="text-2xl font-bold">اربط متجرك للبدء</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  لم نتمكن من العثور على سلات مهجورة حتى الآن. قم بربط متجرك (سلة، زد، وغيرها) لتبدأ المنصة بجمع البيانات وإرسال حملات الاسترجاع تلقائياً.
+                  لم نتمكن من العثور على سلات مهجورة حتى الآن. قم بربط متجرك على Zid لتبدأ منصة عائد بجمع البيانات وإطلاق حملات الاسترجاع تلقائياً.
                 </p>
               </div>
 

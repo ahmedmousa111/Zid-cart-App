@@ -1,8 +1,10 @@
-# Workspace — Zid Cart Recovery SaaS
+# عائد (A'id) — Zid Cart Recovery SaaS
 
 ## Overview
 
-A pnpm workspace monorepo for a Zid (Saudi e-commerce platform) abandoned-cart recovery SaaS. Merchants connect their Zid store via OAuth; the app fetches their abandoned carts and (in future) lets them run recovery campaigns.
+A pnpm workspace monorepo for **عائد** ("A'id" / "the returner"), a Zid (Saudi e-commerce) abandoned-cart recovery SaaS. Merchants connect their Zid store via OAuth; the app fetches their abandoned carts, lets them dispatch recovery messages (currently via a mock console-logging sender) and tracks status transitions in a local Postgres.
+
+**Brand** — name "عائد", premium dark theme (deep-black background, emerald primary `hsl(160 84% 42%)`, gold accent `hsl(43 74% 56%)`). Logo: stylized ع with a return arc rendered as inline SVG in `artifacts/cart-recovery/src/components/brand/logo.tsx`. Fonts: Cairo + Tajawal.
 
 ## Stack
 

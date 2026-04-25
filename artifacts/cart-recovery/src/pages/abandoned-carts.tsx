@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import type { AbandonedCart } from "@/lib/supabase";
 import { apiFetch, ApiError } from "@/lib/api";
+import { Wordmark } from "@/components/brand/logo";
 
 const STATUS_LABELS: Record<AbandonedCart["status"], string> = {
   pending: "قيد الانتظار",
@@ -146,7 +147,7 @@ function CartActions({ cart }: { cart: ApiCart }) {
   }
 
   const sendLabel =
-    cart.status === "contacted" ? "إرسال مجددًا" : "إرسال تذكير";
+    cart.status === "contacted" ? "إرسال مجددًا" : "إرسال تنبيه";
 
   return (
     <div className="flex gap-2 justify-end flex-wrap">
@@ -174,7 +175,7 @@ function CartActions({ cart }: { cart: ApiCart }) {
           ) : (
             <CheckCircle2 className="w-3.5 h-3.5 ml-1.5" />
           )}
-          تأكيد الاسترجاع
+          تم الاسترجاع
         </Button>
       )}
     </div>
@@ -223,14 +224,9 @@ export default function AbandonedCarts() {
   return (
     <div className="min-h-screen bg-muted/20 flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-card border-l flex flex-col shrink-0 sticky top-0 md:h-screen">
-        <div className="h-16 border-b flex items-center px-6">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
-              <ShoppingCart className="w-4 h-4" />
-            </div>
-            <span className="font-bold text-xl text-primary">استرجاع</span>
-          </div>
+      <aside className="w-full md:w-64 bg-sidebar border-l border-sidebar-border flex flex-col shrink-0 sticky top-0 md:h-screen">
+        <div className="h-20 border-b border-sidebar-border flex items-center px-6">
+          <Wordmark />
         </div>
 
         <div className="p-4 flex-1 overflow-y-auto space-y-1">
