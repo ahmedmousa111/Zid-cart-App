@@ -28,6 +28,15 @@ app.use(
 );
 app.use(cors());
 app.use(cookieParser());
+
+// Webhook endpoints need the raw request body so HMAC signatures can be
+// verified byte-for-byte. Mount the raw parser BEFORE express.json so JSON
+// parsing is skipped for these paths.
+app.use(
+  "/api/webhooks/zid",
+  express.raw({ type: "*/*", limit: "1mb" }),
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

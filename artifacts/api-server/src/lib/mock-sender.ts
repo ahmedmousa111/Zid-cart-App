@@ -46,17 +46,6 @@ export async function mockSend(input: SendInput): Promise<SendResult> {
     `[MOCK ${channel.toUpperCase()}] message dispatched (no real send)`,
   );
 
-  // Also surface the full body in dev so the developer can copy/paste it.
-  if (process.env["NODE_ENV"] !== "production") {
-    // eslint-disable-next-line no-console
-    console.log(
-      `\n──────── MOCK ${channel.toUpperCase()} → ${to} ────────\n` +
-        (subject ? `Subject: ${subject}\n` : "") +
-        `${body}\n` +
-        `────────────────────────────────────────\n`,
-    );
-  }
-
   return { provider: "mock", messageId, sentAt };
 }
 
