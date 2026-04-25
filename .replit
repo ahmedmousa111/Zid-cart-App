@@ -28,13 +28,13 @@ args = "Cart Recovery"
 name = "API Server"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=8080 pnpm --filter @workspace/api-server run dev"
-waitForPort = 8080
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash -c 'NODE_ENV=development pnpm --filter @workspace/api-server run build && exec env PORT=8080 NODE_ENV=development node --enable-source-maps artifacts/api-server/dist/index.mjs'"
+waitForPort = 8080
 
 [[workflows.workflow]]
 name = "Cart Recovery"
@@ -55,6 +55,10 @@ expertMode = true
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[[ports]]
+localPort = 5000
+externalPort = 5000
 
 [[ports]]
 localPort = 8080
