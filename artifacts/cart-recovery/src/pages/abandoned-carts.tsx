@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import {
   Table,
   TableBody,
@@ -34,6 +35,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
+  Send,
 } from "lucide-react";
 import type { AbandonedCart } from "@/lib/supabase";
 import { apiFetch, ApiError } from "@/lib/api";
@@ -79,6 +81,105 @@ function formatDate(iso: string) {
 }
 
 type ApiCart = Omit<AbandonedCart, "store_id" | "created_at">;
+
+function CartActions({ cart }: { cart: ApiCart }) {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+
+  const contactMutation = useMutation({
+    mutationFn: () =>
+      apiFetch<{ ok: true }>("/campaigns/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart_id: cart.id }),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["carts"] });
+      toast({
+        title: "تم إرسال رسالة الاسترجاع",
+        description: `إلى ${cart.customer_name ?? "العميل"}`,
+      });
+    },
+    onError: (err: ApiError) => {
+      toast({
+        title: "تعذّر الإرسال",
+        description:
+          err.message === "no_contact_channel"
+            ? "لا يوجد بريد أو رقم جوال للعميل"
+            : err.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const recoverMutation = useMutation({
+    mutationFn: () =>
+      apiFetch<{ ok: true }>(
+        `/campaigns/${encodeURIComponent(cart.id)}/status`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "recovered" }),
+        },
+      ),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["carts"] });
+      toast({
+        title: "تم تأكيد الاسترجاع",
+        description: cart.customer_name ?? cart.id,
+      });
+    },
+    onError: (err: ApiError) => {
+      toast({
+        title: "تعذّر تحديث الحالة",
+        description:
+          err.message === "campaign_not_found"
+            ? "أرسل رسالة الاسترجاع أولًا"
+            : err.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  if (cart.status === "recovered" || cart.status === "lost") {
+    return <span className="text-xs text-muted-foreground">—</span>;
+  }
+
+  const sendLabel =
+    cart.status === "contacted" ? "إرسال مجددًا" : "إرسال تذكير";
+
+  return (
+    <div className="flex gap-2 justify-end flex-wrap">
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => contactMutation.mutate()}
+        disabled={contactMutation.isPending}
+      >
+        {contactMutation.isPending ? (
+          <Loader2 className="w-3.5 h-3.5 ml-1.5 animate-spin" />
+        ) : (
+          <Send className="w-3.5 h-3.5 ml-1.5" />
+        )}
+        {sendLabel}
+      </Button>
+      {cart.status === "contacted" && (
+        <Button
+          size="sm"
+          onClick={() => recoverMutation.mutate()}
+          disabled={recoverMutation.isPending}
+        >
+          {recoverMutation.isPending ? (
+            <Loader2 className="w-3.5 h-3.5 ml-1.5 animate-spin" />
+          ) : (
+            <CheckCircle2 className="w-3.5 h-3.5 ml-1.5" />
+          )}
+          تأكيد الاسترجاع
+        </Button>
+      )}
+    </div>
+  );
+}
 
 export default function AbandonedCarts() {
   const [, setLocation] = useLocation();
@@ -337,6 +438,7 @@ export default function AbandonedCarts() {
                         <TableHead className="text-right">القيمة</TableHead>
                         <TableHead className="text-right">الحالة</TableHead>
                         <TableHead className="text-right">تاريخ الهجر</TableHead>
+                        <TableHead className="text-right">إجراءات</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -375,6 +477,9 @@ export default function AbandonedCarts() {
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                             {formatDate(cart.abandoned_at)}
+                          </TableCell>
+                          <TableCell>
+                            <CartActions cart={cart} />
                           </TableCell>
                         </TableRow>
                       ))}
