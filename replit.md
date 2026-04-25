@@ -24,15 +24,33 @@ Both dev servers are running:
 
 ### What works
 
+**Auth & Zid**
 - `GET /api/healthz` → `{ "status": "ok" }`
 - `GET /api/auth/zid/start` → redirects to Zid OAuth
 - `GET /api/auth/zid/callback` → exchanges code, persists tokens to Supabase `zid_tokens`, sets signed `session` cookie
 - `GET /api/auth/me` → returns merchant info from cookie
 - `POST /api/auth/logout`
 - `GET /api/debug/oauth` → diagnostics for OAuth config
-- `GET /api/carts` → fetches and normalizes abandoned carts from Zid (requires session)
+- `GET /api/carts` → fetches and normalizes abandoned carts from Zid; **overlays local campaign status** so a cart marked `contacted`/`recovered` locally shows that instead of Zid's status
 - Background token refresher (`startTokenRefresher`) sweeps every 15 min, refreshes tokens expiring within 30 min
-- Frontend pages scaffolded: `home`, `login`, `dashboard`, `dashboard/abandoned-carts`, `debug/oauth`, `not-found`
+
+**Campaigns (local Postgres via Drizzle)**
+- `GET /api/campaigns?status=...` → list campaign rows for current merchant
+- `GET /api/campaigns/pending-carts` → live Zid carts that don't yet have a non-pending local campaign — i.e. the work queue
+- `POST /api/campaigns/contact` body `{ cart_id, channel?, message? }` → looks up the cart from Zid, picks email or sms (override with `channel`), calls `mockSend()`, upserts `cart_campaigns` row to status `contacted`, writes an event
+- `POST /api/campaigns/:cartId/status` body `{ status, note? }` → transitions a campaign (e.g. → `recovered` when the merchant confirms checkout, → `lost` after timeout), writes an event
+- `GET /api/campaigns/:cartId/events` → full status-change audit trail
+- **Mock sender** at `artifacts/api-server/src/lib/mock-sender.ts` logs the outgoing message to the API server console with a fake provider ID. Swap the body of `mockSend()` for Twilio/SendGrid later — callers don't change.
+
+**Frontend**
+- Pages scaffolded: `home`, `login`, `dashboard`, `dashboard/abandoned-carts`, `debug/oauth`, `not-found`. Campaign UI not wired yet (backend-only request).
+
+### Database schema (local Postgres)
+
+Created via `pnpm --filter @workspace/db run push`:
+
+- `cart_campaigns` — one row per (merchant_id, cart_id), with `status`, `last_channel`, `last_message`, `attempts`, `contacted_at`, `recovered_at`
+- `cart_campaign_events` — append-only audit log of every status transition (`from_status` → `to_status`, channel, note, timestamp)
 
 ### Required secrets (all set)
 
