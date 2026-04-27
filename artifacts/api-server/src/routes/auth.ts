@@ -33,7 +33,7 @@ function startZidOAuth(req: Request, res: Response): void {
   const state = crypto.randomBytes(24).toString("hex");
   res.cookie("zid_oauth_state", state, {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "none",
     secure: true,
     maxAge: 10 * 60 * 1000,
     path: "/",
@@ -150,7 +150,7 @@ async function handleZidCallback(req: Request, res: Response): Promise<void> {
 
     res.cookie("session", signSession(merchantId), {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "none",
       secure: true,
       maxAge: 30 * 24 * 60 * 60 * 1000,
       path: "/",
@@ -172,7 +172,11 @@ router.get("/auth/callback", handleZidCallback);
 router.get("/auth/zid/callback", handleZidCallback);
 
 router.post("/auth/logout", (_req: Request, res: Response) => {
-  res.clearCookie("session", { path: "/" });
+  res.clearCookie("session", {
+    path: "/",
+    sameSite: "none",
+    secure: true,
+  });
   res.json({ ok: true });
 });
 
