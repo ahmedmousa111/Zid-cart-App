@@ -126,19 +126,22 @@ export async function fetchAbandonedCarts(
   merchantId: string,
 ): Promise<NormalizedCart[]> {
   const tokenRow = await getValidZidToken(merchantId);
-  if (!tokenRow?.access_token) {
+  if (!tokenRow?.access_token || !tokenRow.authorization_token) {
     throw new ZidNotAuthenticatedError("no_token");
   }
 
+  // Zid Partner API quirk: the OAuth response returns BOTH `access_token`
+  // and `authorization`. Authenticated merchant-resource calls require:
+  //   Authorization: Bearer <authorization>     (the long-lived merchant auth)
+  //   X-Manager-Token: <access_token>           (the short-lived OAuth token)
+  // Swapping these is the #1 cause of a 401 "Unauthenticated" response.
   const headers: Record<string, string> = {
-    Authorization: `Bearer ${tokenRow.access_token}`,
+    Authorization: `Bearer ${tokenRow.authorization_token}`,
+    "X-Manager-Token": tokenRow.access_token,
     Accept: "application/json",
     "Accept-Language": "ar",
-    "Content-Type": "application/json",
+    Role: "Manager",
   };
-  if (tokenRow.authorization_token) {
-    headers["X-Manager-Token"] = tokenRow.authorization_token;
-  }
 
   const res = await fetch(ZID_ABANDONED_CARTS_URL, { headers });
   if (!res.ok) {
