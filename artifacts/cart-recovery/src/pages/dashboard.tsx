@@ -109,7 +109,17 @@ export default function Dashboard() {
                   size="lg"
                   className="w-full h-12 text-base shadow-md"
                   onClick={() => {
-                    window.location.href = "/api/auth/zid";
+                    const url = "/api/auth/zid";
+                    try {
+                      const top = window.top;
+                      if (top && top !== window.self) {
+                        top.location.href = url;
+                        return;
+                      }
+                    } catch {
+                      // cross-origin top frame blocks navigation; fall through
+                    }
+                    window.location.href = url;
                   }}
                   data-testid="button-connect-store"
                 >

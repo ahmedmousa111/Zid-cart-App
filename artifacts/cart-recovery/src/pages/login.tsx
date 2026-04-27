@@ -25,7 +25,17 @@ export default function Login() {
   }, []);
 
   const handleZidLogin = () => {
-    window.location.href = "/api/auth/zid";
+    const url = "/api/auth/zid";
+    try {
+      const top = window.top;
+      if (top && top !== window.self) {
+        top.location.href = url;
+        return;
+      }
+    } catch {
+      // cross-origin top frame blocks navigation; fall through
+    }
+    window.location.href = url;
   };
 
   return (
