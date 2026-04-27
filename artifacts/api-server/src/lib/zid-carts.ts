@@ -2,7 +2,7 @@ import { getValidZidToken } from "./zid";
 import { logger } from "./logger";
 
 const ZID_ABANDONED_CARTS_URL =
-  "https://api.zid.sa/v1/managers/store/abandoned-carts";
+  "https://api.zid.sa/v1/managers/store/abandoned-carts?page=1&page_size=50";
 
 type ZidCartCustomer = {
   id?: string | number;
