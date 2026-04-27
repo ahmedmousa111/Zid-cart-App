@@ -25,7 +25,7 @@ export default function Login() {
   }, []);
 
   const handleZidLogin = () => {
-    window.location.href = "/api/auth/zid/start";
+    window.location.href = "/api/auth/zid";
   };
 
   return (

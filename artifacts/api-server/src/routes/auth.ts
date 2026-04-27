@@ -24,7 +24,7 @@ function getRedirectUri(req: Request): string {
   return `${getBaseUrl(req)}/api/auth/callback`;
 }
 
-router.get("/auth/zid/start", (req: Request, res: Response) => {
+function startZidOAuth(req: Request, res: Response): void {
   if (!ZID_CLIENT_ID || !ZID_CLIENT_SECRET) {
     res.status(500).send("Zid OAuth credentials are not configured.");
     return;
@@ -47,7 +47,13 @@ router.get("/auth/zid/start", (req: Request, res: Response) => {
   });
 
   res.redirect(`${ZID_AUTHORIZE_URL}?${params.toString()}`);
-});
+}
+
+// Primary "Connect Store" entry point.
+router.get("/auth/zid", startZidOAuth);
+
+// Backwards-compat alias for older button targets.
+router.get("/auth/zid/start", startZidOAuth);
 
 async function handleZidCallback(req: Request, res: Response): Promise<void> {
   const { code, state, error: zidError } = req.query;
