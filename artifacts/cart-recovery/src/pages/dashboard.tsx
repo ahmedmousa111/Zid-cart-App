@@ -105,8 +105,15 @@ export default function Dashboard() {
               </div>
 
               <div className="pt-4">
-                <Button size="lg" className="w-full h-12 text-base shadow-md">
-                  <Plus className="mr-2 w-5 h-5" />
+                <Button
+                  size="lg"
+                  className="w-full h-12 text-base shadow-md"
+                  onClick={() => {
+                    window.location.href = "/api/auth/zid";
+                  }}
+                  data-testid="button-connect-store"
+                >
+                  <Plus className="ml-2 w-5 h-5" />
                   ربط المتجر الإلكتروني
                 </Button>
               </div>
